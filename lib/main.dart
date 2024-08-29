@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:youtube_clone/providers/socket_provider.dart';
 import 'package:youtube_clone/providers/user_provider.dart';
 import 'package:youtube_clone/providers/video_provider.dart';
+import 'package:youtube_clone/screens/home_screen.dart';
 
 void main() {
   runApp(
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Connect to the socket when the app starts
     Provider.of<SocketProvider>(context, listen: false).connect(context);
-    
+
     return MaterialApp(
       title: 'YouTube Clone',
       theme: ThemeData(
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
         cardColor: Colors.grey[900],
         dividerColor: Colors.grey[700],
       ),
-      home: const Text("My YouTube Clone"),
+      home: const HomeScreen(),
     );
   }
 }
