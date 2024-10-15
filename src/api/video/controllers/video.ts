@@ -13,9 +13,11 @@ export default factories.createCoreController(
         }
 
         // Fetch the video with its likes
-        const video = await strapi.service("api::video.video").findOne(id, {
+        const video: any = await strapi.documents("api::video.video").findOne({
+          documentId: id,
           populate: ["likes"],
         });
+
 
         if (!video) {
           return ctx.notFound("Video not found");
@@ -23,26 +25,29 @@ export default factories.createCoreController(
 
         // Check if the user has already liked this video
         const hasAlreadyLiked = video.likes.some((like) => like.id === user.id);
-
         let updatedVideo;
         if (hasAlreadyLiked) {
           // Remove the user's like
 
           video.updatedVideo = await strapi
-            .service("api::video.video")
-            .update(id, {
+            .documents("api::video.video")
+            .update({
+              documentId: id,
               data: {
                 likes: video.likes.filter(
-                  (like) => like.documentId !== user.documentId,
+                  (like: { documentId: string }) =>
+                    like.documentId !== user.documentId,
                 ),
               },
               populate: ["likes"],
             });
         } else {
           // Add the user's like
-          updatedVideo = await strapi.service("api::video.video").update(id, {
+          updatedVideo = await strapi.documents("api::video.video").update({
+            documentId: id,
+            populate:"likes",
             data: {
-              likes: [...video.likes, user.documentId],
+              likes: [...video.likes, user.documentId] as any,
             },
           });
         }
@@ -65,15 +70,14 @@ export default factories.createCoreController(
         }
 
         // Fetch the video with its views
-        const video = await strapi.service("api::video.video").findOne(id, {
+        const video: any = await strapi.documents("api::video.video").findOne({
+          documentId: id,
           populate: ["views", "uploader"],
         });
 
         if (!video) {
           return ctx.notFound("Video not found");
         }
-
-        console.log(user.id, video.uploader.id);
         // Check if the user is the uploader
         if (user.id === video.uploader.id) {
           return ctx.send({
@@ -82,9 +86,9 @@ export default factories.createCoreController(
         }
 
         // Get the current views
-        const currentViews = video.views.map((view) => view.documentId) || [];
-
-        console.log(currentViews);
+        const currentViews =
+          video.views.map((view: { documentId: string }) => view.documentId) ||
+          [];
         // Check if the user has already viewed this video
         const hasAlreadyViewed = currentViews.includes(user.documentId);
 
@@ -94,16 +98,15 @@ export default factories.createCoreController(
 
         // Add user ID to the views array without removing existing views
         const updatedViews = [...currentViews, user.documentId];
-        console.log(updatedViews);
         // Update the video with the new views array
-        const updatedVideo = await strapi
-          .service("api::video.video")
-          .update(id, {
+        const updatedVideo: any = await strapi
+          .documents("api::video.video")
+          .update({
+            documentId: id,
             data: {
-              views: updatedViews,
+              views: updatedViews as any,
             },
           });
-        console.log(updatedVideo);
         return ctx.send({ data: updatedVideo });
       } catch (error) {
         console.error("Error in incrementView function:", error);
@@ -137,7 +140,9 @@ export default factories.createCoreController(
         // Check if the user is already subscribed
         const isSubscribed =
           uploader.subscribers &&
-          uploader.subscribers.some((subscriber) => subscriber.id === user.id);
+          uploader.subscribers.some(
+            (subscriber: { id: string }) => subscriber.id === user.id,
+          );
 
         let updatedSubscribers;
 
