@@ -158,9 +158,9 @@ export default factories.createCoreController(
 
         // Update the uploader with the new subscribers array
         const updatedUploader = await strapi
-          .query("plugin::users-permissions.user")
+          .documents("plugin::users-permissions.user")
           .update({
-            where: { id },
+            documentId: id,
             data: {
               subscribers: updatedSubscribers,
             },
